@@ -78,9 +78,9 @@ function sign(){
 	echo "filename = $CERTS_DIR/$domain/$FILENAME_NGINX_CONF"
 	
 	echo "# $domain" > $CERTS_DIR/$domain/$FILENAME_NGINX_CONF
-	echo "ssl_certificate $FILENAME_DOMAIN_CERT;" >> $CERTS_DIR/$domain/$FILENAME_NGINX_CONF
-	echo "ssl_certificate_key $FILENAME_DOMAIN_KEY;" >> $CERTS_DIR/$domain/$FILENAME_NGINX_CONF
-	echo "ssl_trusted_certificate $FILENAME_DOMAIN_CERT_FULLCHAIN;" >> $CERTS_DIR/$domain/$FILENAME_NGINX_CONF	
+	echo "ssl_certificate $PWD/$CERTS_DIR/$domain/$FILENAME_DOMAIN_CERT;" >> $CERTS_DIR/$domain/$FILENAME_NGINX_CONF
+	echo "ssl_certificate_key $PWD/$CERTS_DIR/$domain/$FILENAME_DOMAIN_KEY;" >> $CERTS_DIR/$domain/$FILENAME_NGINX_CONF
+	echo "ssl_trusted_certificate $PWD/$CERTS_DIR/$domain/$FILENAME_DOMAIN_CERT_FULLCHAIN;" >> $CERTS_DIR/$domain/$FILENAME_NGINX_CONF
 }
 
 # param $1: domain_name
