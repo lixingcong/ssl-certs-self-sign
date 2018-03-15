@@ -1,0 +1,14 @@
+[ req ]
+default_bits        = 2048
+distinguished_name  = req_distinguished_name
+req_extensions      = san
+extensions          = san
+[ req_distinguished_name ]
+countryName         = CN
+stateOrProvinceName = BJ
+localityName        = BJ
+
+[SAN]
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
