@@ -17,7 +17,7 @@ bash ./self-sign.sh
 server {
 	server_name www.example.com;
 	listen 443 ssl;
-	include /tmp/ssl-certs-self-sign/nginx.conf;
+	include /tmp/ssl-certs-self-sign/certs_signed/example.com/nginx.conf;
 
 	location / {
 		return 200 "<html><head></head><body>Hello World</body></html>";
