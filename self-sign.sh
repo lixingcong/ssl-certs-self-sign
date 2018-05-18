@@ -20,6 +20,8 @@ FILENAME_DEMOCA_TAR="demoCA.tar.gz"
 FILENAME_DEMOCA_DIR="demoCA"
 
 FILENAME_NGINX_CONF="nginx.conf"
+
+DOMAIN_SPLIT_CHAR=";"
 # vars: end
 
 function generate_a_CA(){
@@ -44,16 +46,25 @@ function generate_a_CA(){
 	echo ""
 }
 
-# param $1: domain_name
+# param $1: domain_name array
 function sign(){
 	echo "------ sign a wildcard cert ------"
 	
-	if [ "x" = "x$1" ]; then
-		echo "sign error: domain is empty"
-		exit 1
-	fi
+	RESULT_ARRAY=$1
 	
-	domain=$1
+	# get length of an array
+	ARRAY_LEN=${#RESULT_ARRAY[@]}
+
+	SAN_ARGS=""
+	for (( i=0; i<${ARRAY_LEN}; i++ )); do
+		SAN_ARGS+="DNS:${RESULT_ARRAY[$i]}"
+		
+		if (( i < ARRAY_LEN-1 )); then
+			SAN_ARGS+=","
+		fi
+	done
+	
+	domain=${RESULT_ARRAY[0]}
 	
 	rm -rf $FILENAME_DEMOCA_DIR
 	tar xf $FILENAME_DEMOCA_TAR
@@ -62,7 +73,7 @@ function sign(){
 	
 	cat $FILENAME_EXTEND_TEMPLATE > $filename_extend
 	echo "" >> $filename_extend
-	echo "subjectAltName = DNS:$domain,DNS:*.$domain" >> $filename_extend
+	echo "subjectAltName = $SAN_ARGS" >> $filename_extend
 	
 	openssl x509 -req \
 	  -days 7305 \
@@ -87,13 +98,21 @@ function sign(){
 function generate_a_domain_csr_and_sign(){
 	echo "------- domain CSR ----------------"
 	
-	echo -n "input the domain: "
+	echo "input all domains(splited by $DOMAIN_SPLIT_CHAR)"
+	echo "the first domain was the COMMON NAME"
+	echo "for example, abc.com;*.abc.com;*.xyz.com is ok"
+	echo  -n "input here: "
 	read input_str;
 	
-	domain="example.com"
+	declare -a RESULT_ARRAY
 	if [ ! "x" = "x$input_str" ]; then
-		domain=$input_str
+		IFS=$DOMAIN_SPLIT_CHAR read -a RESULT_ARRAY <<< "$input_str"
+	else
+		echo "input was empty, exit."
+		exit 1
 	fi
+	
+	domain=${RESULT_ARRAY[0]}
 	
 	mkdir -p $CERTS_DIR/$domain
 	rm -rf $CERTS_DIR/$domain/*
@@ -102,11 +121,11 @@ function generate_a_domain_csr_and_sign(){
 	
 	openssl req -new -sha256 \
 	  -key $CERTS_DIR/$domain/$FILENAME_DOMAIN_KEY -out $CERTS_DIR/$domain/$FILENAME_DOMAIN_CSR\
-	  -subj "/C=CN/ST=BJ/L=BJ/CN=$domain"
+	  -subj "/C=CN/ST=BJ/L=BJ/CN=${RESULT_ARRAY[0]}"
 	
 	echo ""
 	
-	sign $domain
+	sign $RESULT_ARRAY
 }
 
 echo "1 for sign a wildcard cert using an new CA"
