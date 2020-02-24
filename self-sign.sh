@@ -57,7 +57,11 @@ function sign(){
 
 	SAN_ARGS=""
 	for (( i=0; i<${ARRAY_LEN}; i++ )); do
-		SAN_ARGS+="DNS:${RESULT_ARRAY[$i]}"
+		if [[ ${RESULT_ARRAY[$i]} =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+			SAN_ARGS+="IP:${RESULT_ARRAY[$i]}"
+		else
+			SAN_ARGS+="DNS:${RESULT_ARRAY[$i]}"
+		fi
 		
 		if (( i < ARRAY_LEN-1 )); then
 			SAN_ARGS+=","
@@ -128,15 +132,15 @@ function generate_a_domain_csr_and_sign(){
 	sign $RESULT_ARRAY
 }
 
-echo "1 for sign a wildcard cert using an new CA"
+echo "1 for generate a new CA"
 echo "2 for sign a wildcard cert using an exist CA"
+#echo "3 for sign cert from CSR using an exist CA" # TODO: modify extended.ext and import CSR
 echo -n "input a num: "
 read choose
 
 case $choose in
 	"1")
 		generate_a_CA
-		generate_a_domain_csr_and_sign
 		;;
 	"2")
 		generate_a_domain_csr_and_sign
